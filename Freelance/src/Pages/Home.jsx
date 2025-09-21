@@ -1,9 +1,52 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
-import { Search } from "lucide-react"; 
+import { Search, Shield, Star, Zap } from "lucide-react"; 
+
 
  function Home() {
+  const categories = [
+  {
+    title: "Development & IT",
+    img: "https://img.freepik.com/free-photo/programming-background-with-person-working-with-codes-computer_23-2150010125.jpg?semt=ais_hybrid&w=740&q=80",
+  },
+  {
+    title: "Design & Creative",
+    img: "https://heartdirected.com/wp-content/uploads/2023/10/graphic-designer.jpeg",
+  },
+  {
+    title: "AI Services",
+    img: "https://media.licdn.com/dms/image/v2/D4D12AQFMT8AryHaEMg/article-cover_image-shrink_720_1280/B4DZWzvqBWG8AI-/0/1742477369899?e=2147483647&v=beta&t=swrrGbr8SPxh4KAJoU4wLHWjr59u2SAhnCIHLPOXXZw",
+  },
+  {
+    title: "Sales & Marketing",
+    img: "https://www.calendar.com/wp-content/uploads/2023/11/Marketing-and-Sales-Strategy.jpg.webp",
+  },
+  {
+    title: "Writing & Translation",
+    img: "https://imageio.forbes.com/specials-images/imageserve/5f93030855de8407b268dfd3/woman-writing/960x0.jpg?height=474&width=711&fit=bounds",
+  },
+  {
+    title: "Admin & Support",
+    img: "https://www.flatworldsolutions.com/featured-images/administrative-support-services.jpg",
+  },
+  {
+    title: "Finance & Accounting",
+    img: "https://i.pinimg.com/736x/79/05/62/790562f43ad69588cd8c407c00c58760.jpg",
+  },
+  {
+    title: "Legal",
+    img: "https://sgtuniversity.ac.in/assets/images/faculty/law/blogs/Unlocking-the-Tapestry-of-Legal-Pursuits.webp",
+  },
+  {
+    title: "HR & Training",
+    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaWw8nCohAZTrElZ9quJEEh3fWWbgCzARnJgyQR2q9l2g4m6QGWt8DgBkzS85p71btBg8&usqp=CAU",
+  },
+  {
+    title: "Engineering & Architecture",
+    img: "https://img.freepik.com/premium-photo/engineering-architecture-concept-engineers-working-building-site-holding-blueprints-architects-engineers-inspection-workplace-architectural-plan_394555-1127.jpg",
+  },
+];
   return (
     <>
     <div className="bg-black text-white min-h-screen">
@@ -67,6 +110,118 @@ import { Search } from "lucide-react";
       </motion.div>
     </div>
       </div>
+      {/* why we choose  */}
+      <section className="py-20 bg-black">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Title Section */}
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <h2 className="text-4xl font-bold text-white mb-4">
+            Why choose <span className="text-purple-500">Freelance?</span>
+          </h2>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            We provide everything you need to build successful working relationships
+          </p>
+        </motion.div>
+
+        {/* Cards Grid */}
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            {
+              icon: <Shield className="w-8 h-8 text-white" />,
+              title: "Secure Payments",
+              desc: "Your payments are protected with our secure escrow system. Pay only when you're satisfied with the work.",
+              gradient: "from-blue-600 to-purple-600",
+            },
+            {
+              icon: <Star className="w-8 h-8 text-white" />,
+              title: "Quality Talent",
+              desc: "Access to vetted freelancers with proven track records and stellar reviews from previous clients.",
+              gradient: "from-green-500 to-teal-600",
+            },
+            {
+              icon: <Zap className="w-8 h-8 text-white" />,
+              title: "Fast Matching",
+              desc: "Our advanced algorithm connects you with the perfect freelancer for your project in minutes, not days.",
+              gradient: "from-pink-500 to-purple-600",
+            },
+          ].map((card, index) => (
+            <motion.div
+              key={index}
+              className="text-center p-8 rounded-2xl bg-gray-900 shadow-lg hover:shadow-purple-500/20 transition-shadow duration-300"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: index * 0.5 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div
+                className={`w-16 h-16 bg-gradient-to-r ${card.gradient} rounded-xl flex items-center justify-center mx-auto mb-6`}
+              >
+                {card.icon}
+              </div>
+              <h3 className="text-2xl font-semibold mb-4 text-white">
+                {card.title}
+              </h3>
+              <p className="text-gray-400">{card.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+     
+     {/* props */}
+      <section className="py-20 bg-black">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Heading */}
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+        >
+          <h2 className="text-4xl font-bold mb-2 bg-gradient-to-r from-violet-500 to-pink-500 bg-clip-text text-transparent">
+            Explore Millions of Props
+          </h2>
+          <p className="text-gray-400 mt-2">
+            Choose from a wide range of categories to find the right talent
+          </p>
+        </motion.div>
+
+        {/* Cards Grid */}
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+          {categories.map((cat, index) => (
+            <motion.div
+              key={index}
+              className="rounded-xl overflow-hidden bg-gray-900 shadow-lg hover:shadow-orange-500/30 cursor-pointer"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: index * 0.15 }}
+              whileHover={{ scale: 1.07, transition: { duration: 0.3 } }}
+            >
+              {/* Image */}
+              <div className="h-40 w-full overflow-hidden">
+                <img
+                  src={cat.img}
+                  alt={cat.title}
+                  className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                />
+              </div>
+              {/* Text */}
+              <div className="p-4 text-center">
+                <h3 className="text-lg font-semibold text-white">{cat.title}</h3>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
     </div>
     </>
   );

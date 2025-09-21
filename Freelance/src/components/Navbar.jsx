@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { FaUserCircle } from "react-icons/fa"; 
 
  function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -30,10 +32,10 @@ import React, { useState } from "react";
                 <li className="px-4 py-2 hover:bg-green-200 cursor-pointer">
                   Web Developers
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer">
+                <li className="px-4 py-2 hover:bg-green-200 cursor-pointer">
                   Designers
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer">
+                <li className="px-4 py-2 hover:bg-green-200 cursor-pointer">
                   Writers
                 </li>
               </ul>
@@ -46,15 +48,24 @@ import React, { useState } from "react";
 
         {/* Right Side: Login & Signup */}
         <div className="hidden md:flex space-x-4">
-          <button className="px-4 py-2 rounded-lg hover:text-green-400">
+         <Link
+            to="/login"
+            className="px-4 py-2 border border-green-500 text-green-500 rounded-lg hover:bg-green-500 hover:text-white transition"
+          >
             Login
-          </button>
-          <button className="px-4 py-2 bg-green-500 text-black font-semibold rounded-lg hover:bg-green-400">
-            Sign Up
-          </button>
+          </Link>
+         {/* Signup button */}
+          <Link
+            to="/signup"
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+          >
+            Sign up
+          </Link>
+          <Link to="/profile" className="text-gray-600 hover:text-green-500">
+            <FaUserCircle size={28} />
+          </Link>
         </div>
       </nav>
-
      
     </div>
     </>
