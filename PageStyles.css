@@ -1,0 +1,37 @@
+.page-container {
+  min-height: 90vh;              /* full height minus footer */
+  background-color: #1f2937;     /* dark gray */
+  color: #f3f4f6;                /* light text */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 60px 20px;
+  width:1700px;
+}
+
+.page-container h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  color: #facc15; /* yellow heading */
+  text-align: center;
+}
+
+.page-container p {
+  max-width: 800px;
+  font-size: 1.2rem;
+  line-height: 1.8;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.page-container .big-box {
+  margin-top: 40px;
+  background-color: #111827;  /* darker box */
+  padding: 40px;
+  border-radius: 12px;
+  width: 40%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+
+  
+}

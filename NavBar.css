@@ -1,0 +1,110 @@
+/* General Navbar */
+.navbar {
+  background: linear-gradient(135deg, #1f1f1f, #2b2b2b);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+/* Container */
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  max-width: 1300px;
+}
+
+/* Logo */
+.logo-g{
+  font-weight:bold;
+  font-size:2rem;
+  color:#6c63ff;
+  background: linear-gradient(135deg,#6c63ff,#00f0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 10px #6c63ff, 0 0 20px #00f0ff;
+  /* margin-right:5px; */
+  margin-left: -180px;
+}
+
+.navbar-logo {
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-decoration: none;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+
+}
+
+.navbar-logo:hover {
+  color: #6c63ff;
+  text-shadow: 0 0 10px #6c63ff;
+}
+
+/* Menu */
+.nav-menu {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  text-align: center;
+}
+
+.nav-item {
+  height: 70px;
+
+}
+
+.nav-links {
+  color: #fff;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  padding: 0 1rem;
+  height: 100%;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.nav-links:hover {
+  color: #6c63ff;
+  text-shadow: 0 0 8px #6c63ff;
+}
+
+/* Buttons */
+.nav-btn .btn-login,
+.nav-btn .btn-signup {
+  border-radius: 30px;
+  padding: 0.3px;
+  margin-left: 10px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-login {
+  background-color: transparent;
+  border: 0px solid #6c63ff;
+  color: #fff;
+  
+  
+}
+
+.btn-login:hover {
+  background-color: #6c63ff;
+  color: #fff;
+}
+.btn-signup:hover {
+  background-color: #6c63ff;
+  color: #fff;
+}
+
+
+
