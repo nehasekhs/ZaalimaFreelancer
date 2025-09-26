@@ -1,0 +1,95 @@
+/* .findwork-menu {
+  background-color: #121212;
+  color: #e0e0e0;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.findwork-title {
+  color: #00bfa5;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.findwork-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.findwork-card {
+  background-color: #1e1e1e;
+  padding: 1.2rem;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.findwork-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.findwork-card-title {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.findwork-card-link {
+  color: #00bfa5;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+  .findwork-title {
+    font-size: 1.2rem;
+  }
+} */
+
+.findwork-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #121212;
+  padding: 1rem;
+  border-radius: 10px;
+  display: none; /* hidden by default */
+  z-index: 999;
+  min-width: 300px;
+}
+
+.nav-item:hover .findwork-dropdown {
+  display: block; /* show on hover */
+}
+
+.findwork-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+.nav-item{
+      position: relative;
+      padding-bottom: 0.5rem;
+}
+.findwork-card {
+  background-color: #1e1e1e;
+  padding: 0.8rem;
+  border-radius: 6px;
+  color: #e0e0e0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.findwork-card:hover {
+  background-color: #050c36;
+  color: #fae6e6;
+  transform: translateY(-2px);
+}
+
+.findwork-card-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
