@@ -1,766 +1,247 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { getTopFreelancersApi, postProjectApi, getFreelancersByCategoryApi } from "../api";
-import { getFreelancersByCategory } from "../data/freelancers";
+
+// Mock freelancer data (replace with API later)
+const mockFreelancer = {
+  id: "fr_001",
+  name: "Alex Johnson",
+  title: "Senior Full-Stack Developer",
+  location: "Remote • Berlin, DE",
+  rating: 4.9,
+  reviewsCount: 128,
+  hourlyRate: 75,
+  availability: "20-30 hrs/week",
+  experienceYears: 7,
+  photo: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=400",
+  bio: "I build reliable, well-tested web apps with React, Node.js, and TypeScript. I care about performance, DX, and maintainability.",
+  skills: [
+    "React", "Next.js", "Node.js", "Express", "TypeScript", "MongoDB", "PostgreSQL", "GraphQL", "Docker", "CI/CD"
+  ],
+  portfolio: [
+    { id: "p1", title: "E‑commerce Platform", image: "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=600" },
+    { id: "p2", title: "Fintech Dashboard", image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600" },
+    { id: "p3", title: "SaaS Analytics", image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=600" },
+  ],
+  reviews: [
+    { id: "r1", author: "Acme Inc.", rating: 5, text: "Excellent delivery and communication!" },
+    { id: "r2", author: "Nova Labs", rating: 5, text: "Solid architecture and testing discipline." },
+    { id: "r3", author: "GreenTech", rating: 4.5, text: "Great performance optimizations." },
+  ]
+};
+
+// Subcomponents
+function FreelancerProfile({ freelancer, onHire }) {
+  return (
+    <div className="bg-gray-900/80 border border-gray-700 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start">
+      <img src={freelancer.photo} alt={freelancer.name} className="w-28 h-28 rounded-xl object-cover border border-gray-700" />
+      <div className="flex-1">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white">{freelancer.name}</h1>
+            <p className="text-pink-300 font-medium">{freelancer.title}</p>
+            <p className="text-gray-400 text-sm mt-1">{freelancer.location}</p>
+            <div className="flex items-center gap-3 mt-2 text-sm text-gray-300">
+              <span>★ {freelancer.rating} ({freelancer.reviewsCount})</span>
+              <span>•</span>
+              <span>${freelancer.hourlyRate}/hr</span>
+              <span>•</span>
+              <span>{freelancer.availability}</span>
+              <span>•</span>
+              <span>{freelancer.experienceYears}+ yrs</span>
+            </div>
+          </div>
+          <button onClick={onHire} className="px-5 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-violet-600 text-white font-semibold">
+            Hire Freelancer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Tabs({ active, onChange }) {
+  const items = ["Overview", "Skills & Expertise", "Portfolio", "Reviews & Ratings"];
+  return (
+    <div className="flex flex-wrap gap-2 mt-6">
+      {items.map((item) => (
+        <button
+          key={item}
+          onClick={() => onChange(item)}
+          className={`px-4 py-2 rounded-lg text-sm ${active === item ? 'bg-pink-500 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+        >
+          {item}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function OverviewTab({ freelancer }) {
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6 text-gray-300 leading-relaxed">
+      {freelancer.bio}
+    </div>
+  );
+}
+
+function SkillsTab({ freelancer }) {
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6 flex flex-wrap gap-2">
+      {freelancer.skills.map((s) => (
+        <span key={s} className="px-3 py-1 rounded-full text-sm bg-gray-800 text-gray-200 border border-gray-700">{s}</span>
+      ))}
+    </div>
+  );
+}
+
+function PortfolioTab({ freelancer }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {freelancer.portfolio.map((p) => (
+        <div key={p.id} className="bg-gray-900/60 border border-gray-800 rounded-xl overflow-hidden">
+          <img src={p.image} alt={p.title} className="w-full h-40 object-cover" />
+          <div className="p-4 text-white font-medium">{p.title}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ReviewsTab({ freelancer }) {
+  return (
+    <div className="space-y-3">
+      {freelancer.reviews.map((r) => (
+        <div key={r.id} className="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="text-white font-semibold">{r.author}</div>
+            <div className="text-yellow-400">★ {r.rating}</div>
+          </div>
+          <p className="text-gray-300 text-sm mt-1">{r.text}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Hire Flow Steps
+function ProjectForm({ value, onChange, onNext }) {
+  const handle = (e) => onChange({ ...value, [e.target.name]: e.target.value });
+  return (
+    <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-6 space-y-4">
+      <div>
+        <label className="block text-sm text-pink-300 mb-2">Project Name</label>
+        <input name="name" value={value.name} onChange={handle} className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white" placeholder="e.g. Marketing site revamp" />
+      </div>
+      <div>
+        <label className="block text-sm text-pink-300 mb-2">Description</label>
+        <textarea name="description" value={value.description} onChange={handle} rows={4} className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white" placeholder="Describe scope, deliverables, expectations" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-pink-300 mb-2">Budget ($)</label>
+          <input name="budget" type="number" value={value.budget} onChange={handle} className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white" placeholder="e.g. 2000" />
+        </div>
+        <div>
+          <label className="block text-sm text-pink-300 mb-2">Timeline</label>
+          <input name="timeline" value={value.timeline} onChange={handle} className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white" placeholder="e.g. 4 weeks" />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button onClick={onNext} className="px-5 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-violet-600 text-white font-semibold">Continue</button>
+      </div>
+    </div>
+  );
+}
+
+function ContractSummary({ project, freelancer, onBack, onNext }) {
+  return (
+    <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-6 space-y-4 text-gray-200">
+      <h3 className="text-white text-xl font-semibold">Confirm Details</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-800">
+          <div className="text-gray-400 text-sm mb-1">Project</div>
+          <div className="font-semibold text-white">{project.name || 'Untitled Project'}</div>
+          <div className="text-sm mt-1">Budget: ${project.budget || '—'}</div>
+          <div className="text-sm">Timeline: {project.timeline || '—'}</div>
+          <div className="text-sm mt-2 text-gray-300">{project.description || 'No description provided.'}</div>
+        </div>
+        <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-800">
+          <div className="text-gray-400 text-sm mb-1">Freelancer</div>
+          <div className="font-semibold text-white">{freelancer.name}</div>
+          <div className="text-sm">{freelancer.title}</div>
+          <div className="text-sm mt-1">Rate: ${freelancer.hourlyRate}/hr</div>
+          <div className="text-sm">Availability: {freelancer.availability}</div>
+        </div>
+      </div>
+      <div className="flex justify-between">
+        <button onClick={onBack} className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 border border-gray-700">Back</button>
+        <button onClick={onNext} className="px-5 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-violet-600 text-white font-semibold">Confirm</button>
+      </div>
+    </div>
+  );
+}
+
+function PaymentPlaceholder({ onBack, onNext }) {
+  return (
+    <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-6 text-gray-200">
+      <h3 className="text-white text-xl font-semibold mb-2">Payment</h3>
+      <p className="text-gray-300 mb-6">This is a mock payment step. Click below to proceed.</p>
+      <div className="flex justify-between">
+        <button onClick={onBack} className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 border border-gray-700">Back</button>
+        <button onClick={onNext} className="px-5 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-violet-600 text-white font-semibold">Proceed to Payment</button>
+      </div>
+    </div>
+  );
+}
+
+function SuccessMessage({ freelancer, onReset }) {
+  return (
+    <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-8 text-center text-gray-200">
+      <div className="text-5xl mb-4">🎉</div>
+      <h3 className="text-white text-2xl font-bold mb-2">You have successfully hired {freelancer.name} for your project!</h3>
+      <p className="text-gray-300 mb-6">We’ll notify the freelancer and open a Project Room for collaboration.</p>
+      <button onClick={onReset} className="px-5 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-violet-600 text-white font-semibold">Back to profile</button>
+    </div>
+  );
+}
 
 export default function HireFreelancer() {
-  const [freelancers, setFreelancers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [categoryFreelancers, setCategoryFreelancers] = useState([]);
-  const [selectedFreelancer, setSelectedFreelancer] = useState(null);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    budget: "",
-    deadline: "",
-    category: "Development & IT",
-    company: "",
-    selectedFreelancerId: "",
-    projectType: "Fixed Price",
-    experienceLevel: "Intermediate",
-    projectDuration: "1-3 months",
-    skillsRequired: [],
-    visibility: "Public",
-    timezone: "UTC",
-    paymentTerms: "Escrow",
-    isUrgent: false,
-    remoteWork: true,
-    location: "",
-    languages: ["English"],
-    maxProposals: 50,
-    autoAccept: false,
-    autoAcceptAmount: ""
-  });
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
-  const [skills, setSkills] = useState([]);
-  const [availableSkills, setAvailableSkills] = useState([]);
-  const [skillCategories, setSkillCategories] = useState([]);
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-  const [skillSearchTerm, setSkillSearchTerm] = useState('');
-  const [filteredSkills, setFilteredSkills] = useState([]);
-  const [showSkillDropdown, setShowSkillDropdown] = useState(false);
-
-  useEffect(() => {
-    fetchTopFreelancers();
-    fetchCategoryFreelancers(formData.category);
-    fetchSkills();
-    fetchSkillCategories();
-  }, []);
-
-  useEffect(() => {
-    fetchCategoryFreelancers(formData.category);
-    setSelectedFreelancer(null);
-    setFormData(prev => ({ ...prev, selectedFreelancerId: "" }));
-  }, [formData.category]);
-
-  const fetchTopFreelancers = async () => {
-    try {
-      setLoading(true);
-      const response = await getTopFreelancersApi(6);
-      setFreelancers(response.freelancers || []);
-    } catch (error) {
-      console.error("Error fetching freelancers:", error);
-      setFreelancers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCategoryFreelancers = async (category) => {
-    try {
-      // First try to get from backend API
-      try {
-        const response = await getFreelancersByCategoryApi(category, 3);
-        setCategoryFreelancers(response.freelancers || []);
-      } catch (apiError) {
-        // Fallback to local data
-        const localFreelancers = getFreelancersByCategory(category);
-        setCategoryFreelancers(localFreelancers.slice(0, 3));
-      }
-    } catch (error) {
-      console.error("Error fetching category freelancers:", error);
-      setCategoryFreelancers([]);
-    }
-  };
-
-  const fetchSkills = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/skills?limit=100`);
-      const data = await response.json();
-      setAvailableSkills(data.skills || []);
-    } catch (error) {
-      console.error("Error fetching skills:", error);
-      // Fallback to hardcoded skills if API fails
-      setAvailableSkills([
-        { _id: '1', name: 'React', category: 'Frontend', isPopular: true },
-        { _id: '2', name: 'Node.js', category: 'Backend', isPopular: true },
-        { _id: '3', name: 'JavaScript', category: 'Programming', isPopular: true },
-        { _id: '4', name: 'Python', category: 'Programming', isPopular: true },
-        { _id: '5', name: 'UI/UX Design', category: 'Design', isPopular: true },
-        { _id: '6', name: 'Graphic Design', category: 'Design', isPopular: true },
-        { _id: '7', name: 'Content Writing', category: 'Writing', isPopular: true },
-        { _id: '8', name: 'SEO', category: 'Marketing', isPopular: true },
-        { _id: '9', name: 'Data Analysis', category: 'Analytics', isPopular: true },
-        { _id: '10', name: 'Project Management', category: 'Business', isPopular: true }
-      ]);
-    }
-  };
-
-  const fetchSkillCategories = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/skills/categories`);
-      const data = await response.json();
-      setSkillCategories(data.categories || []);
-    } catch (error) {
-      console.error("Error fetching skill categories:", error);
-      setSkillCategories([]);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleFreelancerSelect = (freelancer) => {
-    setSelectedFreelancer(freelancer);
-    setFormData(prev => ({
-      ...prev,
-      selectedFreelancerId: freelancer.id || freelancer._id
-    }));
-  };
-
-  const handleSkillAdd = (skill) => {
-    if (!formData.skillsRequired.includes(skill.name)) {
-      setFormData(prev => ({
-        ...prev,
-        skillsRequired: [...prev.skillsRequired, skill.name]
-      }));
-    }
-  };
-
-  const handleSkillRemove = (skillName) => {
-    setFormData(prev => ({
-      ...prev,
-      skillsRequired: prev.skillsRequired.filter(skill => skill !== skillName)
-    }));
-  };
-
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: checked
-    }));
-  };
-
-  const handleSkillSearch = (term) => {
-    setSkillSearchTerm(term);
-    if (term.length > 0) {
-      const filtered = availableSkills.filter(skill =>
-        skill.name.toLowerCase().includes(term.toLowerCase())
-      );
-      setFilteredSkills(filtered);
-      setShowSkillDropdown(true);
-    } else {
-      setShowSkillDropdown(false);
-    }
-  };
-
-  const handleSkillSelect = (skill) => {
-    if (!formData.skillsRequired.includes(skill.name)) {
-      setFormData(prev => ({
-        ...prev,
-        skillsRequired: [...prev.skillsRequired, skill.name]
-      }));
-    }
-    setSkillSearchTerm('');
-    setShowSkillDropdown(false);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setMessage("");
-
-    try {
-      const projectData = {
-        title: formData.title,
-        description: formData.description,
-        company: formData.company || "Anonymous",
-        budgetMin: parseFloat(formData.budget),
-        budgetMax: parseFloat(formData.budget) * 1.2, // Add 20% buffer
-        duration: formData.deadline ? `Due ${new Date(formData.deadline).toLocaleDateString()}` : "Flexible",
-        category: formData.category,
-        tags: [formData.category.split(' ')[0]], // Use first word of category as tag
-        selectedFreelancerId: formData.selectedFreelancerId || null,
-        
-        // Enhanced fields
-        projectType: formData.projectType,
-        experienceLevel: formData.experienceLevel,
-        projectDuration: formData.projectDuration,
-        skillsRequired: formData.skillsRequired,
-        visibility: formData.visibility,
-        timezone: formData.timezone,
-        paymentTerms: formData.paymentTerms,
-        isUrgent: formData.isUrgent,
-        remoteWork: formData.remoteWork,
-        location: formData.location,
-        languages: formData.languages,
-        maxProposals: parseInt(formData.maxProposals),
-        autoAccept: formData.autoAccept,
-        autoAcceptAmount: formData.autoAcceptAmount ? parseFloat(formData.autoAcceptAmount) : null,
-        totalBudget: parseFloat(formData.budget),
-        currency: "USD"
-      };
-      
-      await postProjectApi(projectData);
-      setMessage("Project posted successfully! Freelancers will start submitting proposals soon.");
-      setFormData({
-        title: "",
-        description: "",
-        budget: "",
-        deadline: "",
-        category: "Development & IT",
-        company: "",
-        selectedFreelancerId: "",
-        projectType: "Fixed Price",
-        experienceLevel: "Intermediate",
-        projectDuration: "1-3 months",
-        skillsRequired: [],
-        visibility: "Public",
-        timezone: "UTC",
-        paymentTerms: "Escrow",
-        isUrgent: false,
-        remoteWork: true,
-        location: "",
-        languages: ["English"],
-        maxProposals: 50,
-        autoAccept: false,
-        autoAcceptAmount: ""
-      });
-      setSelectedFreelancer(null);
-    } catch (error) {
-      console.error("Error posting project:", error);
-      setMessage("Error posting project. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const [freelancer] = useState(mockFreelancer);
+  const [activeTab, setActiveTab] = useState("Overview");
+  const [step, setStep] = useState(0); // 0 = profile, 1..4 = steps
+  const [project, setProject] = useState({ name: "", description: "", budget: "", timeline: "" });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-900 via-black to-pink-900 px-4 py-12">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent mb-6">
-            Hire a Top Freelancer
-          </h1>
-          <p className="text-gray-300 text-lg max-w-3xl mx-auto">
-            Post your project and get matched with the best freelance talent for your needs. 
-            Describe your requirements, set your budget, and start receiving proposals within minutes.
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 px-4 py-10">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <FreelancerProfile freelancer={freelancer} onHire={() => setStep(1)} />
         </motion.div>
 
-        <div className="max-w-4xl mx-auto">
-          {/* Project Form */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="bg-gray-900/90 rounded-2xl shadow-2xl p-8 border border-pink-500/30 mb-8"
-          >
-            <h2 className="text-2xl font-bold text-white mb-6">Post Your Project</h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-pink-400 mb-2">Project Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Build a React Website"
-                  className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-pink-400 mb-2">Company/Organization (Optional)</label>
-                <input
-                  type="text"
-                  name="company"
-                  value={formData.company}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Your Company Name"
-                  className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-pink-400 mb-2">Project Description</label>
-                <textarea
-                  rows={4}
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Describe your project, deliverables, and expectations..."
-                  className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-pink-400 mb-2">Category</label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                >
-                  <option value="Development & IT">Development & IT</option>
-                  <option value="Design & Creative">Design & Creative</option>
-                  <option value="Writing & Translation">Writing & Translation</option>
-                  <option value="Sales & Marketing">Sales & Marketing</option>
-                  <option value="Data Science & Analytics">Data Science & Analytics</option>
-                </select>
-              </div>
+        {step === 0 && (
+          <>
+            <Tabs active={activeTab} onChange={setActiveTab} />
+            <div className="mt-4">
+              {activeTab === "Overview" && <OverviewTab freelancer={freelancer} />}
+              {activeTab === "Skills & Expertise" && <SkillsTab freelancer={freelancer} />}
+              {activeTab === "Portfolio" && <PortfolioTab freelancer={freelancer} />}
+              {activeTab === "Reviews & Ratings" && <ReviewsTab freelancer={freelancer} />}
+            </div>
+          </>
+        )}
 
-              {/* Project Type and Experience Level */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-pink-400 mb-2">Project Type</label>
-                  <select
-                    name="projectType"
-                    value={formData.projectType}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                  >
-                    <option value="Fixed Price">Fixed Price</option>
-                    <option value="Hourly Rate">Hourly Rate</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-pink-400 mb-2">Experience Level</label>
-                  <select
-                    name="experienceLevel"
-                    value={formData.experienceLevel}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                  >
-                    <option value="Entry">Entry Level</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Expert">Expert Level</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Project Duration and Payment Terms */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-pink-400 mb-2">Project Duration</label>
-                  <select
-                    name="projectDuration"
-                    value={formData.projectDuration}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                  >
-                    <option value="Less than 1 month">Less than 1 month</option>
-                    <option value="1-3 months">1-3 months</option>
-                    <option value="3-6 months">3-6 months</option>
-                    <option value="6+ months">6+ months</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-pink-400 mb-2">Payment Terms</label>
-                  <select
-                    name="paymentTerms"
-                    value={formData.paymentTerms}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                  >
-                    <option value="Escrow">Escrow Protection</option>
-                    <option value="Milestone-based">Milestone-based</option>
-                    <option value="Completion-based">Completion-based</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Skills Required */}
-              <div>
-                <label className="block text-sm font-medium text-pink-400 mb-2">Skills Required</label>
-                <div className="space-y-3">
-                  {/* Selected Skills */}
-                  {formData.skillsRequired.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {formData.skillsRequired.map((skill, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-pink-500/20 text-pink-300 border border-pink-500/30"
-                        >
-                          {skill}
-                          <button
-                            type="button"
-                            onClick={() => handleSkillRemove(skill)}
-                            className="ml-2 text-pink-400 hover:text-pink-200"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Enhanced Skill Search */}
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search and add skills..."
-                      value={skillSearchTerm}
-                      onChange={(e) => handleSkillSearch(e.target.value)}
-                      onFocus={() => setShowSkillDropdown(skillSearchTerm.length > 0)}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          const skillName = e.target.value.trim();
-                          if (skillName && !formData.skillsRequired.includes(skillName)) {
-                            handleSkillAdd({ name: skillName });
-                            setSkillSearchTerm('');
-                          }
-                        }
-                      }}
-                    />
-                    
-                    {/* Skill Dropdown */}
-                    {showSkillDropdown && filteredSkills.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                        {filteredSkills.slice(0, 8).map((skill) => (
-                          <button
-                            key={skill._id}
-                            type="button"
-                            onClick={() => handleSkillSelect(skill)}
-                            disabled={formData.skillsRequired.includes(skill.name)}
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors ${
-                              formData.skillsRequired.includes(skill.name)
-                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                : 'text-white'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span>{skill.name}</span>
-                              {skill.category && (
-                                <span className="text-xs text-gray-400">{skill.category}</span>
-                              )}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Popular Skills */}
-                  {availableSkills.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-gray-400 text-sm">Popular Skills:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {availableSkills.slice(0, 10).map((skill) => (
-                          <button
-                            key={skill._id}
-                            type="button"
-                            onClick={() => handleSkillAdd(skill)}
-                            disabled={formData.skillsRequired.includes(skill.name)}
-                            className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                              formData.skillsRequired.includes(skill.name)
-                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                : 'bg-gray-700 text-gray-300 hover:bg-violet-600 hover:text-white'
-                            }`}
-                          >
-                            {skill.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Advanced Options Toggle */}
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Advanced Options</h3>
-                <button
-                  type="button"
-                  onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                  className="text-pink-400 hover:text-pink-300 text-sm font-medium"
-                >
-                  {showAdvancedOptions ? 'Hide' : 'Show'} Advanced Options
-                </button>
-              </div>
-
-              {/* Advanced Options */}
-              {showAdvancedOptions && (
-                <div className="space-y-6 p-4 bg-gray-800/30 rounded-xl border border-gray-700">
-                  {/* Visibility and Location */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-pink-400 mb-2">Project Visibility</label>
-                      <select
-                        name="visibility"
-                        value={formData.visibility}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                      >
-                        <option value="Public">Public</option>
-                        <option value="Private">Private</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-pink-400 mb-2">Location (Optional)</label>
-                      <input
-                        type="text"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        placeholder="e.g. New York, NY"
-                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Timezone and Max Proposals */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-pink-400 mb-2">Timezone</label>
-                      <select
-                        name="timezone"
-                        value={formData.timezone}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                      >
-                        <option value="UTC">UTC</option>
-                        <option value="America/New_York">Eastern Time</option>
-                        <option value="America/Chicago">Central Time</option>
-                        <option value="America/Denver">Mountain Time</option>
-                        <option value="America/Los_Angeles">Pacific Time</option>
-                        <option value="Europe/London">London</option>
-                        <option value="Europe/Paris">Paris</option>
-                        <option value="Asia/Tokyo">Tokyo</option>
-                        <option value="Asia/Shanghai">Shanghai</option>
-                        <option value="Australia/Sydney">Sydney</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-pink-400 mb-2">Max Proposals</label>
-                      <input
-                        type="number"
-                        name="maxProposals"
-                        value={formData.maxProposals}
-                        onChange={handleInputChange}
-                        min="1"
-                        max="100"
-                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Checkboxes */}
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        name="isUrgent"
-                        checked={formData.isUrgent}
-                        onChange={handleCheckboxChange}
-                        className="w-4 h-4 text-pink-500 bg-gray-800 border-gray-600 rounded focus:ring-pink-500"
-                      />
-                      <label className="text-gray-300">This is an urgent project</label>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        name="remoteWork"
-                        checked={formData.remoteWork}
-                        onChange={handleCheckboxChange}
-                        className="w-4 h-4 text-pink-500 bg-gray-800 border-gray-600 rounded focus:ring-pink-500"
-                      />
-                      <label className="text-gray-300">Remote work allowed</label>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        name="autoAccept"
-                        checked={formData.autoAccept}
-                        onChange={handleCheckboxChange}
-                        className="w-4 h-4 text-pink-500 bg-gray-800 border-gray-600 rounded focus:ring-pink-500"
-                      />
-                      <label className="text-gray-300">Auto-accept proposals under specific amount</label>
-                    </div>
-                  </div>
-
-                  {/* Auto-accept amount */}
-                  {formData.autoAccept && (
-                    <div>
-                      <label className="block text-sm font-medium text-pink-400 mb-2">Auto-accept Amount ($)</label>
-                      <input
-                        type="number"
-                        name="autoAcceptAmount"
-                        value={formData.autoAcceptAmount}
-                        onChange={handleInputChange}
-                        placeholder="Enter maximum amount for auto-accept"
-                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Choose Top Freelancer - Inside Project Form */}
-              {formData.category && (
-                <div>
-                  <label className="block text-sm font-medium text-pink-400 mb-3">Choose Top Freelancer</label>
-                  <div className={`rounded-xl p-4 border-2 transition-all duration-300 ${
-                    selectedFreelancer 
-                      ? 'bg-gray-800/30 border-pink-500' 
-                      : 'bg-gray-800/30 border-violet-600'
-                  }`}>
-                    {categoryFreelancers.length > 0 ? (
-                      <div className="space-y-3">
-                        <p className="text-gray-300 text-sm mb-4">Choose from top freelancers in this category:</p>
-                        <div className="grid gap-3">
-                          {categoryFreelancers.map((freelancer, index) => (
-                            <motion.div
-                              key={freelancer.id || freelancer._id || index}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              className={`group relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
-                                selectedFreelancer?.id === freelancer.id || selectedFreelancer?._id === freelancer._id
-                                  ? 'border-pink-500 bg-gradient-to-r from-pink-500/10 to-violet-500/10 shadow-lg shadow-pink-500/20'
-                                  : 'border-gray-600 bg-gray-800/50 hover:border-violet-500 hover:bg-gray-800/70 hover:shadow-lg hover:shadow-violet-500/10'
-                              }`}
-                              onClick={() => handleFreelancerSelect(freelancer)}
-                            >
-                              <div className="flex items-center space-x-4">
-                                <div className="relative">
-                                  <img
-                                    src={freelancer.img || freelancer.avatarUrl || "https://randomuser.me/api/portraits/men/1.jpg"}
-                                    alt={freelancer.name}
-                                    className="w-14 h-14 rounded-full object-cover border-2 border-gray-600 group-hover:border-violet-400 transition-colors"
-                                  />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center justify-between">
-                                    <h3 className="text-white font-semibold text-lg">{freelancer.name}</h3>
-                                    <div className="flex items-center space-x-2">
-                                      <span className="text-yellow-400 text-sm font-medium">★ {freelancer.rating || 4.5}</span>
-                                      <span className="text-pink-400 text-sm font-bold">${freelancer.hourlyRate || freelancer.price || 50}/hr</span>
-                                    </div>
-                                  </div>
-                                  <p className="text-gray-400 text-sm mt-1">{freelancer.title || freelancer.role}</p>
-                                  <div className="flex items-center space-x-4 mt-2">
-                                    {freelancer.location && (
-                                      <span className="text-gray-500 text-xs flex items-center">
-                                        📍 {freelancer.location}
-                                      </span>
-                                    )}
-                                    {freelancer.experienceYears && (
-                                      <span className="text-gray-500 text-xs flex items-center">
-                                        💼 {freelancer.experienceYears}+ years
-                                      </span>
-                                    )}
-                                    {freelancer.skills && freelancer.skills.length > 0 && (
-                                      <span className="text-gray-500 text-xs flex items-center">
-                                        🛠️ {freelancer.skills[0]}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              
-                            </motion.div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <div className="text-gray-400 text-lg mb-2">🔍</div>
-                        <p className="text-gray-400">No freelancers available for this category</p>
-                        <p className="text-gray-500 text-sm mt-1">Try selecting a different category</p>
-                      </div>
-                    )}
-                    
-                    {selectedFreelancer && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="mt-4 p-4 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
-                            <span className="text-white text-sm font-bold">✓</span>
-                          </div>
-                          <div>
-                            <p className="text-green-400 font-semibold">Freelancer Selected</p>
-                            <p className="text-green-300 text-sm">
-                              {selectedFreelancer.name} - {selectedFreelancer.title || selectedFreelancer.role}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-pink-400 mb-2">Budget ($)</label>
-                  <input
-                    type="number"
-                    name="budget"
-                    value={formData.budget}
-                    onChange={handleInputChange}
-                    min="1"
-                    placeholder="e.g. 500"
-                    className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-pink-400 mb-2">Deadline</label>
-                  <input
-                    type="date"
-                    name="deadline"
-                    value={formData.deadline}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-violet-600 text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                    required
-                  />
-                </div>
-              </div>
-              {message && (
-                <div className={`p-3 rounded-lg ${message.includes('Error') ? 'bg-red-900/50 text-red-300' : 'bg-green-900/50 text-green-300'}`}>
-                  {message}
-                </div>
-              )}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-                type="submit"
-                disabled={submitting}
-                className="w-full py-3 mt-4 rounded-lg bg-gradient-to-r from-pink-500 to-violet-600 text-white font-bold text-lg shadow-lg transition-all disabled:opacity-50"
-              >
-                {submitting ? "Posting..." : "Post Project"}
-              </motion.button>
-            </form>
-          </motion.div>
-
-        </div>
+        {step === 1 && (
+          <ProjectForm value={project} onChange={setProject} onNext={() => setStep(2)} />
+        )}
+        {step === 2 && (
+          <ContractSummary project={project} freelancer={freelancer} onBack={() => setStep(1)} onNext={() => setStep(3)} />
+        )}
+        {step === 3 && (
+          <PaymentPlaceholder onBack={() => setStep(2)} onNext={() => setStep(4)} />
+        )}
+        {step === 4 && (
+          <SuccessMessage freelancer={freelancer} onReset={() => { setStep(0); setProject({ name: "", description: "", budget: "", timeline: "" }); }} />
+        )}
       </div>
     </div>
   );

@@ -13,21 +13,45 @@ import {
   FileText,
   Users
 } from "lucide-react";
+import { isFreelancer } from "../utils/role";
 
-const sidebarItems = [
-  { path: "/", icon: Home, label: "Dashboard", description: "Overview and analytics" },
-  { path: "/profile", icon: User, label: "Profile", description: "Manage your profile" },
-  { path: "/project-room/demo", icon: MessageSquare, label: "Messages", description: "Chat and communication" },
-  { path: "/projects", icon: Search, label: "Find Freelancer", description: "Browse available talent" },
-  { path: "/client/jobs/new", icon: Briefcase, label: "Hire Freelancer", description: "Post new job" },
-  { path: "/client/jobs", icon: FileText, label: "My Jobs", description: "Manage job postings" },
-  { path: "/payments", icon: CreditCard, label: "Payments", description: "Payment history and wallet" },
-  { path: "/reviews/demo", icon: Users, label: "Reviews", description: "View ratings and feedback" },
-  { path: "/settings", icon: Settings, label: "Settings", description: "Account preferences" },
-];
+function buildSidebarItems(userType) {
+  const common = [
+    { path: "/", icon: Home, label: "Dashboard", description: "Overview and analytics" },
+    { path: "/profile", icon: User, label: "Profile", description: "Manage your profile" },
+    { path: "/project-room/demo", icon: MessageSquare, label: "Messages", description: "Chat and communication" },
+    { path: "/payments", icon: CreditCard, label: "Payments", description: "Payment history and wallet" },
+    { path: "/reviews/demo", icon: Users, label: "Reviews", description: "View ratings and feedback" },
+    { path: "/settings", icon: Settings, label: "Settings", description: "Account preferences" },
+  ];
+
+  if (userType === 'client') {
+    return [
+      ...common,
+      { path: "/hire", icon: Briefcase, label: "Post New Project", description: "Create a project" },
+      { path: "/freelancers", icon: Search, label: "Find Freelancer", description: "Browse available talent" },
+    ];
+  }
+
+  if (userType === 'freelancer') {
+    return [
+      ...common,
+      { path: "/analytics", icon: BarChart3, label: "View Analysis", description: "Performance analytics" },
+      { path: "/projects", icon: Search, label: "Find Work", description: "Browse available jobs" },
+      { path: "/my-jobs", icon: FileText, label: "My Jobs", description: "Your active jobs" },
+      { path: "/my-projects", icon: FileText, label: "My Projects", description: "Projects you're part of" },
+      { path: "/ai-matching", icon: Users, label: "AI Matches", description: "Suggested opportunities" },
+      { path: "/gamification", icon: Users, label: "Gamification", description: "Earn badges & points" },
+    ];
+  }
+
+  return common;
+}
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
+  const userType = localStorage.getItem('userType');
+  const sidebarItems = buildSidebarItems(userType);
 
   return (
     <>
@@ -105,7 +129,7 @@ export default function Sidebar({ isOpen, onClose }) {
               </div>
               <div>
                 <div className="font-medium text-white">User Name</div>
-                <div className="text-sm text-gray-400">Client</div>
+                <div className="text-sm text-gray-400">{(userType || 'User').charAt(0).toUpperCase() + (userType || 'User').slice(1)}</div>
               </div>
             </div>
           </div>

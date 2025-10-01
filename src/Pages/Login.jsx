@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { deriveUserType } from '../utils/role';
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({
@@ -36,7 +37,11 @@ const Login = ({ onLogin }) => {
 
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        onLogin(data.user);
+        const email = (data?.user?.email || formData.email || '').toLowerCase();
+        const userType = deriveUserType(email);
+        localStorage.setItem('userType', userType);
+        const mergedUser = { ...(data.user || {}), userType };
+        onLogin(mergedUser);
       } else {
         setError(data.message || 'Login failed');
       }
@@ -145,7 +150,7 @@ const Login = ({ onLogin }) => {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-400">Freelancer Account:</span>
-              <span className="text-gray-300">freelancer@demo.com / password123</span>
+              <span className="text-gray-300">freelancer@demo.co / password123</span>
             </div>
           </div>
         </div>

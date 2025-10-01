@@ -72,8 +72,8 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     let user = await User.findOne({ email });
-    // Auto-provision demo users for convenience
-    if (!user && /@demo\.com$/i.test(email)) {
+    // Auto-provision demo users for convenience (.com and .co)
+    if (!user && /@demo\.(com|co)$/i.test(email)) {
       const role = email.toLowerCase().startsWith('client') ? 'client' : 'freelancer';
       const hashedPassword = await bcrypt.hash(password, 10);
       user = await User.create({ name: email.split('@')[0], email, password: hashedPassword, role });

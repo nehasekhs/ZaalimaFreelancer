@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RealtimeNotifications from './RealtimeNotifications';
+import { isClient, isFreelancer } from '../utils/role';
 
 const Navigation = ({ user, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,10 +31,11 @@ const Navigation = ({ user, onLogout }) => {
     }
   };
 
-  const navItems = [
-    { name: 'Find Work', href: '/projects', icon: '🔍' },
-    { name: 'My Jobs', href: '/my-jobs', icon: '💼' },
+  // Build items by role per spec (fallback to localStorage if missing on user)
+  const userType = user?.userType || localStorage.getItem('userType');
+  const baseItems = [
     { name: 'Demos', href: '/demo', icon: '🎬' },
+    { name: 'Verification Center', href: '/verification', icon: '✅' },
     { name: 'Messages', href: '/messages', icon: '💬',
       submenu: [
         { label: 'Inbox', href: '/messages' },
@@ -41,21 +43,29 @@ const Navigation = ({ user, onLogout }) => {
         { label: 'Demo Sessions', href: '/demo' },
         { label: 'Shared Demo Files', href: '/demo/files' },
       ]
-    },
-    { name: 'Reports', href: '/reports', icon: '📊' },
+    }
   ];
 
-  const clientNavItems = [
+  const clientOnly = [
     { name: 'Post a Project', href: '/hire', icon: '➕' },
     { name: 'Find Freelancers', href: '/freelancers', icon: '👥' },
-    { name: 'AI Matching', href: '/ai-matching', icon: '🤖' },
-    { name: 'Demos', href: '/demo', icon: '🎬' },
+  ];
+
+  const freelancerOnly = [
+    { name: 'Find Work', href: '/projects', icon: '🔍' },
+    { name: 'My Jobs', href: '/my-jobs', icon: '💼' },
     { name: 'My Projects', href: '/my-projects', icon: '📋' },
-    { name: 'Messages', href: '/messages', icon: '💬' },
+    { name: 'AI Matches', href: '/ai-matching', icon: '🤖' },
+    { name: 'Gamification', href: '/gamification', icon: '🏆' },
     { name: 'Analytics', href: '/analytics', icon: '📊' },
   ];
 
-  const currentNavItems = user?.userType === 'client' ? clientNavItems : navItems;
+  let currentNavItems = baseItems;
+  if (userType === 'client') {
+    currentNavItems = [...clientOnly, ...baseItems];
+  } else if (userType === 'freelancer') {
+    currentNavItems = [...freelancerOnly, ...baseItems];
+  }
 
   return (
     <nav className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">

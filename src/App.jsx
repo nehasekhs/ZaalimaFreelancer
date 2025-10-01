@@ -21,6 +21,7 @@ import AISearch from './components/AISearch';
 import Gamification from './components/Gamification';
 import CollaborationTools from './components/CollaborationTools';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import { deriveUserType } from './utils/role';
 
 // Pages
 import Login from './Pages/Login';
@@ -44,6 +45,7 @@ function App() {
   const checkAuthStatus = async () => {
     try {
       const token = localStorage.getItem('token');
+      const storedUserType = localStorage.getItem('userType');
       if (token) {
         const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/auth/verify`, {
           headers: {
@@ -53,25 +55,37 @@ function App() {
         });
         if (response.ok) {
           const userData = await response.json();
-          setUser(userData.user);
+          const mergedUser = { ...(userData.user || {}), userType: storedUserType || userData.user?.userType };
+          if (!mergedUser.userType && mergedUser?.email) {
+            const inferred = deriveUserType(mergedUser.email);
+            mergedUser.userType = inferred;
+            localStorage.setItem('userType', inferred);
+          }
+          setUser(mergedUser);
         } else {
           localStorage.removeItem('token');
+          localStorage.removeItem('userType');
         }
       }
     } catch (error) {
       console.error('Error checking auth status:', error);
       localStorage.removeItem('token');
+      localStorage.removeItem('userType');
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogin = (userData) => {
+    if (userData?.userType) {
+      localStorage.setItem('userType', userData.userType);
+    }
     setUser(userData);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userType');
     setUser(null);
   };
 
