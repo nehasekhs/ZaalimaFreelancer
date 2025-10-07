@@ -1,0 +1,41 @@
+/* Dropdown button */
+.dropdown-btn {
+  background: none;
+  border: none;
+  color: #f1f1f1; /* light text for dark theme */
+  cursor: pointer;
+  font-size: 16px;
+  padding: 8px;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  position: absolute;
+  top: 35px;
+  left: 0;
+  background-color: #1e1e1e;
+  padding: 10px 0;
+  border-radius: 8px;
+  list-style: none;
+  width: 180px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  z-index: 100;
+}
+
+.dropdown-menu li a {
+  display: block;
+  padding: 10px 15px;
+  color: #f1f1f1;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.dropdown-menu li a:hover {
+  background-color: #333333;
+  color: #1dbf73;
+}
+
+/* Positioning the dropdown parent */
+.dropdown {
+  position: relative;
+}

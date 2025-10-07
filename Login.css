@@ -1,0 +1,64 @@
+.form-container {
+  min-height: 100vh;             /* full viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #121212;           /* dark background */
+  padding: 20px;
+}
+
+/* ===== The Form Itself ===== */
+.form-container form {
+  background: #1e1e1e;
+  padding: 30px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== Input Fields ===== */
+.form-container input {
+  padding: 12px 14px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #f1f1f1;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border 0.3s ease;
+}
+
+.form-container input:focus {
+  border-color: #3b82f6; /* blue highlight */
+}
+
+/* ===== Submit Button ===== */
+.form-container button {
+  padding: 12px;
+  background: #2c59a1; /* blue button */
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.form-container button:hover {
+  background: #2563eb; /* darker blue */
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 480px) {
+  .form-container form {
+    padding: 20px;
+  }
+  .form-container input,
+  .form-container button {
+    font-size: 14px;
+  }
+}
