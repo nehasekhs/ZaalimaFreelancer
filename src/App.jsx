@@ -139,7 +139,7 @@ function App() {
               {/* Protected Routes - Temporarily bypassed for testing */}
               <Route 
                 path="/dashboard" 
-                element={<Dashboard userType={user?.userType || 'client'} />} 
+                element={<Dashboard userType={user?.userType || 'freelancer'} />} 
               />
               
               <Route 

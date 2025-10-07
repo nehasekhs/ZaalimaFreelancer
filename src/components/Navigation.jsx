@@ -41,19 +41,18 @@ const Navigation = ({ user, onLogout }) => {
         { label: 'Inbox', href: '/messages' },
         { label: 'Notifications', href: '/notifications' },
         { label: 'Demo Sessions', href: '/demo' },
-        { label: 'Shared Demo Files', href: '/demo/files' },
+        { label: 'Shared Demo Files', href: '/collaboration' },
       ]
     }
   ];
 
   const clientOnly = [
-    { name: 'Post a Project', href: '/hire', icon: '➕' },
+    { name: 'Hire Freelancer', href: '/hire', icon: '➕' },
     { name: 'Find Freelancers', href: '/freelancers', icon: '👥' },
   ];
 
   const freelancerOnly = [
-    { name: 'Find Work', href: '/projects', icon: '🔍' },
-    { name: 'My Jobs', href: '/my-jobs', icon: '💼' },
+  
     { name: 'My Projects', href: '/my-projects', icon: '📋' },
     { name: 'AI Matches', href: '/ai-matching', icon: '🤖' },
     { name: 'Gamification', href: '/gamification', icon: '🏆' },

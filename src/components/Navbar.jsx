@@ -37,7 +37,7 @@ import { FaUserCircle } from "react-icons/fa";
           </li>
 
           <li className="hover:text-green-400 cursor-pointer">
-            <Link to="/projects">Find Work</Link>
+            <Link to="/projects">Post Project</Link>
           </li>
           <li className="hover:text-green-400 cursor-pointer">
             <Link to="/reviews/demo">Reviews</Link>

@@ -20,11 +20,42 @@ const CollaborationTools = ({ projectId, userId, onClose }) => {
   const screenStreamRef = useRef(null);
   const messagesEndRef = useRef(null);
   const lastPointRef = useRef(null);
+   const [showProjectModal, setShowProjectModal] = useState(true)
   
+   // 👇 Added: Function to close modal
   const handleClose = () => {
+    setShowProjectModal(false);
     stopMediaStreams();
     if (onClose) onClose();
   };
+  // ...existing code...
+
+useEffect(() => {
+  // Setup canvas context for drawing
+  const canvas = canvasRef.current;
+  if (canvas) {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = selectedTool === 'eraser' ? '#ffffff' : drawingColor;
+    ctxRef.current = ctx;
+  }
+}, [selectedTool, drawingColor]);
+
+useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === 'Escape') {
+      handleClose();
+    }
+  };
+  window.addEventListener('keydown', handleEsc);
+  return () => window.removeEventListener('keydown', handleEsc);
+}, [onClose]);
+
+// ...existing code...
 
   useEffect(() => {
     connectToProject();
@@ -146,36 +177,7 @@ const CollaborationTools = ({ projectId, userId, onClose }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const resize = () => {
-      const parent = canvas.parentElement;
-      if (!parent) return;
-      const rect = parent.getBoundingClientRect();
-      canvas.width = Math.floor(rect.width);
-      canvas.height = Math.floor(rect.height);
-      const ctx = canvas.getContext('2d');
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = selectedTool === 'eraser' ? '#ffffff' : drawingColor;
-      ctxRef.current = ctx;
-    };
-    resize();
-    window.addEventListener('resize', resize);
-    const onKey = (e) => {
-      if (e.key === 'Escape') {
-        handleClose();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('resize', resize);
-      window.removeEventListener('keydown', onKey);
-    };
-  }, []);
-
+  
   useEffect(() => {
     if (ctxRef.current) {
       ctxRef.current.strokeStyle = selectedTool === 'eraser' ? '#ffffff' : drawingColor;
@@ -336,7 +338,7 @@ const CollaborationTools = ({ projectId, userId, onClose }) => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
-
+ if (!showProjectModal) return null;
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <motion.div

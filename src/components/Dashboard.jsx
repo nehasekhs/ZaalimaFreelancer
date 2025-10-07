@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Shield, Search, Users, TrendingUp, Globe, Zap } from "lucide-react";
+import {Link} from "react-router-dom";
 
 const Dashboard = ({ userType = 'client' }) => {
   const [stats, setStats] = useState({
@@ -183,15 +185,60 @@ const Dashboard = ({ userType = 'client' }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br via-purple-900 to-violet-900">
+      
+     {/* === Hero Header === */}
+      <header className="in-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
+        <div className="max-w-7xl mx-auto px-6 py-16">
+          <div className="flex flex-col md:flex-row items-center gap-10">
+            <div className="flex-1">
+              <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-white">
+                Find Top Talent. Grow Your Business.
+              </h1>
+              <p className="mt-4 text-zinc-300 text-lg md:text-xl max-w-2xl">
+                Hire vetted freelancers for web development, design, writing,
+                and more. Post your job and get matched fast.
+              </p>
+              <div className="mt-8 flex gap-4">
+                <Link
+                  to="/signup"
+                  className="px-6 py-3 bg-transparent border hover:bg-pink-500/10 text-pink-500 rounded-lg font-medium transition"
+                >
+                  Get Started
+                </Link>
+                <Link
+                  to="/projects"
+                  className="px-6 py-3 bg-transparent border border-pink-500 text-pink-600 rounded-lg font-medium hover:bg-pink-500/10 transition"
+                >
+                  Explore Projects
+                </Link>
+              </div>
+            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+              className="flex-1 flex justify-center"
+            >
+              <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTu4RRRYIVg6Omu0CMaor8CGyt8P_k-NgF4lqldRav4eQBK5nwJOTLEUyndfrM6"
+                alt="Freelancers working"
+                className="w-full max-w-md drop-shadow-lg border border-gray-700 rounded-lg"
+              />
+            </motion.div>
+          </div>
+        </div>
+      </header>
+
+      {/* === Dashboard Stats === */}
+      <div className="container mx-auto px-4 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">
             Welcome back! 👋
           </h1>
           <p className="text-gray-300">
-            Here's what's happening with your {userType === 'client' ? 'projects' : 'freelance work'} today.
+            Here's what's happening with your{' '}
+            {userType === 'client' ? 'projects' : 'freelance work'} today.
           </p>
         </div>
 
@@ -297,6 +344,7 @@ const Dashboard = ({ userType = 'client' }) => {
               </div>
             </div>
           </div>
+          
 
           {/* Sidebar */}
           <div className="space-y-6">
@@ -329,6 +377,7 @@ const Dashboard = ({ userType = 'client' }) => {
                 )}
               </div>
             </div>
+            
 
             {/* Recent Messages */}
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
@@ -367,6 +416,99 @@ const Dashboard = ({ userType = 'client' }) => {
             
           </div>
         </div>
+        <br>
+        </br>
+        <br></br>
+         <section className="mt-16 bg-gradient-to-br  via-purple-950 to-violet-950 border-t border-gray-800 rounded-2xl shadow-inner max-w-7xl mx-auto px-6 py-16">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-center bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent">
+            Clients only pay after hiring
+          </h2>
+          <p className="text-center mt-2 text-zinc-400">Choose a plan that fits your business</p>
+
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                title: "MARKETPLACE",
+                fee: "5% fee after hiring",
+                desc: "For starting out on our global freelancer marketplace",
+                features: ["Free to post jobs", "AI-powered features", "Collaboration & tracking tools"],
+              },
+              {
+                title: "BUSINESS PLUS",
+                fee: "10% fee after hiring",
+                desc: "For growing businesses with premium features and support",
+                popular: true,
+                features: ["Pre-screened top 1% of talent", "Premium 24/7 support", "60 invites per job post"],
+              },
+              {
+                title: "ENTERPRISE",
+                fee: "Contact sales",
+                desc: "For scaling comprehensive solutions",
+                features: ["Dedicated account management", "SSO & integrations", "Unlimited invites per job"],
+              },
+            ].map((p, i) => (
+              <motion.div
+                key={p.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                className="relative group p-6 rounded-xl bg-gray-800/60 border border-gray-700 hover:border-pink-500/50 transition-all duration-300"
+              >
+                <h3 className="text-xl font-semibold bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent">{p.title}</h3>
+                <div className="mt-1 text-pink-400 font-semibold">{p.fee}</div>
+                <p className="mt-3 text-gray-400">{p.desc}</p>
+                <ul className="mt-4 space-y-2 text-gray-300">
+                  {p.features.map((f) => (
+                    <li key={f}><span className="text-pink-400">✅</span> {f}</li>
+                  ))}
+                </ul>
+               
+              </motion.div>
+            ))}
+          </div>
+        </section>
+                
+        
+        {/* === Why Choose Section === */}
+        <section className="mt-16 bg-gradient-to-br  via-purple-950 to-violet-950 border-t border-gray-800 rounded-2xl shadow-inner">
+          <div className="max-w-7xl mx-auto px-6 py-16">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-center bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent">
+              Why Choose Neha's Website?
+            </h2>
+
+            <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { icon: Shield, title: "Secure Payments", desc: "Protected transactions with escrow system and milestone-based payments." },
+                { icon: Search, title: "Smart Matching", desc: "AI-powered matching system connects you with the perfect talent or projects." },
+                { icon: Users, title: "Verified Profiles", desc: "All freelancers and clients go through our verification process." },
+                { icon: TrendingUp, title: "Growth Tracking", desc: "Detailed analytics and insights to help you grow your business." },
+                { icon: Globe, title: "Global Reach", desc: "Connect with talent and opportunities from around the world." },
+                { icon: Zap, title: "Fast Hiring", desc: "Streamlined process to get your projects started quickly." },
+              ].map((f, i) => (
+                <motion.div
+                  key={f.title}
+                  className="p-6 rounded-xl border border-gray-800 bg-gray-900/40 hover:shadow-[0_0_20px_rgba(236,72,153,0.15)] hover:border-pink-500/40 transition-all duration-300"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.4, delay: i * 0.05 }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="w-9 h-9 rounded-md bg-gradient-to-r from-pink-500 to-violet-600 inline-flex items-center justify-center">
+                      {(() => { const Icon = f.icon; return <Icon className="w-5 h-5 text-white" />; })()}
+                    </span>
+                    <div className="text-xl font-semibold text-white">{f.title}</div>
+                  </div>
+                  <div className="mt-2 text-zinc-400">{f.desc}</div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
       </div>
     </div>
   );
