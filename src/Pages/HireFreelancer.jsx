@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import CollaborationTools from "../components/CollaborationTools";
 
 const mockFreelancer = [
   {
@@ -27,7 +28,8 @@ const mockFreelancer = [
     ],
     languages: [{ name: "English", level: "Native" }, { name: "Spanish", level: "Conversational" }],
     education: [{ degree: "B.Sc. Computer Science", school: "Stanford University", year: "2018" }],
-    certifications: ["AWS Developer", "MongoDB Certified Developer"]
+    certifications: ["AWS Developer", "MongoDB Certified Developer"],
+    demoSessions: [{ sessionId: "ds_001", title: "Live Project Demo" }]
   },
 
   {
@@ -55,7 +57,8 @@ const mockFreelancer = [
     ],
     languages: [{ name: "English", level: "Fluent" }, { name: "Spanish", level: "Native" }],
     education: [{ degree: "B.A. Graphic Design", school: "Universidad Complutense de Madrid", year: "2016" }],
-    certifications: ["Adobe Creative Expert", "Google UX Design"]
+    certifications: ["Adobe Creative Expert", "Google UX Design"],
+    demoSessions: [<CollaborationTools />]
   },
 
   {
@@ -83,7 +86,8 @@ const mockFreelancer = [
     ],
     languages: [{ name: "English", level: "Fluent" }, { name: "Hindi", level: "Native" }],
     education: [{ degree: "M.Tech AI & Data Science", school: "IIT Bombay", year: "2019" }],
-    certifications: ["TensorFlow Developer", "AWS ML Engineer", "DeepLearning.AI NLP"]
+    certifications: ["TensorFlow Developer", "AWS ML Engineer", "DeepLearning.AI NLP"],
+    demoSessions: [<CollaborationTools />]
   },
 
   {
@@ -111,7 +115,8 @@ const mockFreelancer = [
     ],
     languages: [{ name: "English", level: "Native" }],
     education: [{ degree: "MBA Marketing", school: "University of Toronto", year: "2019" }],
-    certifications: ["Google Ads Certified", "HubSpot Inbound Marketing"]
+    certifications: ["Google Ads Certified", "HubSpot Inbound Marketing"],
+    demoSessions: [<CollaborationTools />]
   },
 
   {
@@ -135,7 +140,8 @@ const mockFreelancer = [
     reviews: [{ id: "r1", author: "Inspire Media", rating: 5, text: "Superb writing quality and voice!" }],
     languages: [{ name: "English", level: "Native" }],
     education: [{ degree: "B.A. English Literature", school: "University of Oxford", year: "2017" }],
-    certifications: ["Content Marketing Certified", "SEO Specialist"]
+    certifications: ["Content Marketing Certified", "SEO Specialist"],
+    demoSessions: [<CollaborationTools />]
   },
 
   {
@@ -157,7 +163,8 @@ const mockFreelancer = [
     reviews: [{ id: "r1", author: "BizEase", rating: 4.9, text: "Reliable and organized!" }],
     languages: [{ name: "English", level: "Fluent" }, { name: "Korean", level: "Native" }],
     education: [{ degree: "B.B.A. Management", school: "Yonsei University", year: "2019" }],
-    certifications: ["MS Office Expert", "Google Workspace Certified"]
+    certifications: ["MS Office Expert", "Google Workspace Certified"],
+    demoSessions: [<CollaborationTools />]
   },
 
   {
@@ -179,7 +186,8 @@ const mockFreelancer = [
     reviews: [{ id: "r1", author: "WealthMax", rating: 5, text: "Excellent financial insights!" }],
     languages: [{ name: "English", level: "Fluent" }, { name: "Hindi", level: "Native" }],
     education: [{ degree: "MBA Finance", school: "IIM Ahmedabad", year: "2019" }],
-    certifications: ["CFA Level 2", "Financial Modeling Certified"]
+    certifications: ["CFA Level 2", "Financial Modeling Certified"],
+    demoSessions: [<CollaborationTools />]
   },
 
   {
@@ -201,7 +209,8 @@ const mockFreelancer = [
     reviews: [{ id: "r1", author: "LawLink", rating: 4.9, text: "Professional and trustworthy legal support." }],
     languages: [{ name: "English", level: "Native" }],
     education: [{ degree: "Juris Doctor (JD)", school: "Harvard Law School", year: "2015" }],
-    certifications: ["Member of NY State Bar", "Corporate Legal Practice"]
+    certifications: ["Member of NY State Bar", "Corporate Legal Practice"],
+    demoSessions: [<CollaborationTools />]
   },
 
   {
@@ -223,7 +232,8 @@ const mockFreelancer = [
     reviews: [{ id: "r1", author: "TalentGrow", rating: 4.8, text: "Helped us scale our hiring fast!" }],
     languages: [{ name: "English", level: "Fluent" }, { name: "Mandarin", level: "Conversational" }],
     education: [{ degree: "MBA HR", school: "NUS Business School", year: "2018" }],
-    certifications: ["SHRM Certified Professional", "LinkedIn Talent Solutions Expert"]
+    certifications: ["SHRM Certified Professional", "LinkedIn Talent Solutions Expert"],
+    demoSessions: [<CollaborationTools />]
   },
 
   {
@@ -245,7 +255,8 @@ const mockFreelancer = [
     reviews: [{ id: "r1", author: "BuildPro", rating: 5, text: "High-quality and efficient design work." }],
     languages: [{ name: "English", level: "Native" }],
     education: [{ degree: "B.Eng Civil Engineering", school: "University of Sydney", year: "2015" }],
-    certifications: ["Chartered Engineer (CEng)", "LEED Green Associate"]
+    certifications: ["Chartered Engineer (CEng)", "LEED Green Associate"],
+    demoSessions: [<CollaborationTools />]
   }
 
 ];
@@ -294,7 +305,7 @@ function FreelancerCard({ freelancer, onHire, onOverview }) {
 
 // Tabs for details page
 function DetailTabs({ active, onChange }) {
-  const items = ["Overview", "Portfolio", "Reviews", "Languages", "Education", "Certifications"];
+  const items = ["Overview", "Portfolio", "Reviews", "Languages", "Education", "Certifications","Demo Sessions"];
   return (
     <div className="flex flex-wrap gap-2 mt-6">
       {items.map((it) => (
@@ -359,6 +370,20 @@ function DetailOverview({ f }) {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+function DetailDemoSessions({ f }) {
+  if (!f.demoSessions?.length) return <div className="text-gray-300">No demo sessions available.</div>;
+  return (
+    <div className="space-y-4">
+      {f.demoSessions.map((session) => (
+        <div key={session.sessionId} className="bg-gray-900/60 p-4 rounded-xl border border-gray-800">
+          <h4 className="text-white font-semibold">{session.title}</h4>
+          {/* Render the actual CollaborationTools component */}
+          <CollaborationTools sessionId={session.sessionId} freelancerId={f.id} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -619,6 +644,7 @@ function SuccessMessage({ freelancer, onReset }) {
               {detailTab === "Languages" && <DetailLanguages f={selectedFreelancer} />}
               {detailTab === "Education" && <DetailEducation f={selectedFreelancer} />}
               {detailTab === "Certifications" && <DetailCertifications f={selectedFreelancer} />}
+              {detailTab === "Demo Sessions" && <DetailDemoSessions f={selectedFreelancer} />}
             </div>
           </motion.div>
         )}

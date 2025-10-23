@@ -68,11 +68,11 @@ const Gamification = ({ userId, userType = 'client' }) => {
       console.error('Error fetching leaderboard:', error);
       // Fallback to mock data
       setLeaderboard([
-        { rank: 1, name: 'Sarah Johnson', points: 2500, level: 10, avatar: null, badge: '👑' },
-        { rank: 2, name: 'Mike Chen', points: 2300, level: 9, avatar: null, badge: '🥈' },
-        { rank: 3, name: 'Emily Rodriguez', points: 2100, level: 8, avatar: null, badge: '🥉' },
-        { rank: 4, name: 'You', points: 1250, level: 5, avatar: null, badge: '🎯' },
-        { rank: 5, name: 'Alex Thompson', points: 1100, level: 4, avatar: null, badge: '⭐' }
+        { rank: 1, name: 'Sarah Johnson', points: 2500, level: 10, avatar: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=400", badge: '👑' },
+        { rank: 2, name: 'Mike Chen', points: 2300, level: 9, avatar:"https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=400", badge: '🥈' },
+        { rank: 3, name: 'Emily Rodriguez', points: 2100, level: 8, avatar: "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=400", badge: '🥉' },
+        { rank: 4, name: 'You', points: 1250, level: 5, avatar: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400", badge: '🎯' },
+        { rank: 5, name: 'Alex Thompson', points: 1100, level: 4, avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400", badge: '⭐' }
       ]);
     }
   };
@@ -212,7 +212,7 @@ const Gamification = ({ userId, userType = 'client' }) => {
         </div>
       </div>
 
-      {/* Leaderboard */}
+     
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
         <h3 className="text-xl font-semibold text-white mb-6">Leaderboard</h3>
         <div className="space-y-3">

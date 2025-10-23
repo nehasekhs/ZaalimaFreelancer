@@ -95,21 +95,21 @@ useEffect(() => {
     setMessages([
       {
         id: '1',
-        sender: { id: '1', name: 'John Doe', avatar: null },
+        sender: { id: '1', name: 'John Doe', avatar: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=400" },
         content: 'Welcome to the project collaboration space!',
         timestamp: new Date(Date.now() - 3600000).toISOString(),
         type: 'text'
       },
       {
         id: '2',
-        sender: { id: '2', name: 'Sarah Johnson', avatar: null },
+        sender: { id: '2', name: 'Sarah Johnson', avatar: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=400" },
         content: 'Thanks! I\'m excited to work on this project.',
         timestamp: new Date(Date.now() - 3000000).toISOString(),
         type: 'text'
       },
       {
         id: '3',
-        sender: { id: '1', name: 'John Doe', avatar: null },
+        sender: { id: '1', name: 'John Doe', avatar: "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=400" },
         content: 'I\'ve uploaded the design files. Please take a look.',
         timestamp: new Date(Date.now() - 1800000).toISOString(),
         type: 'file',
@@ -319,6 +319,48 @@ useEffect(() => {
       console.error('Error uploading file:', error);
     }
   };
+ 
+  // ✅ Added: Download file function
+  const handleFileDownload = async (fileId, fileName) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/collaboration/download/${fileId}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (!res.ok) throw new Error('Failed to download file');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error downloading file:', err);
+      alert('Error downloading file');
+    }
+  };
+
+  const handleFileDelete = async (fileId) => {
+  if (!confirm("Are you sure you want to delete this file?")) return;
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/collaboration/delete/${fileId}`, {
+      method: "DELETE",
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (!res.ok) throw new Error("Failed to delete file");
+
+    setSharedFiles(prev => prev.filter(file => file.id !== fileId));
+  } catch (err) {
+    console.error("Error deleting file:", err);
+    alert("Failed to delete file");
+  }
+};
 
   const getFileIcon = (type) => {
     switch (type) {
@@ -354,17 +396,7 @@ useEffect(() => {
             <div className="flex items-center space-x-2">
               {activeUsers.map(user => (
                 <div key={user.id} className="flex items-center space-x-1">
-                  <div className="relative">
-                    <img
-                      src={user.avatar || '/default-avatar.png'}
-                      alt={user.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                    <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full ${
-                      user.isOnline ? 'bg-green-500' : 'bg-gray-500'
-                    }`} />
-                  </div>
-                  <span className="text-sm text-gray-300">{user.name}</span>
+                
                 </div>
               ))}
             </div>
@@ -483,11 +515,22 @@ useEffect(() => {
                       {formatFileSize(file.size)} • {file.uploadedBy} • {new Date(file.uploadedAt).toLocaleDateString()}
                     </p>
                   </div>
-                  <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </button>
+                   <button 
+      className="p-2 text-gray-400 hover:text-white transition-colors"
+      onClick={() => handleFileDownload(file.id, file.name)}
+    >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    </button>
+    <button
+      className="p-2 text-red-400 hover:text-red-600 transition-colors"
+      onClick={() => handleFileDelete(file.id)}
+    >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
                 </div>
               ))}
             </div>

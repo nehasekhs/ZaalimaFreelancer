@@ -5,6 +5,9 @@ const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 const app = express();
 const server = http.createServer(app);
@@ -29,6 +32,137 @@ mongoose
   .connect(process.env.MONGO_URI || "mongodb://localhost:27017/freelancehub")
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
+
+// Serve static uploads
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// ✅ Create uploads folder if missing
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
+
+// ✅ Multer setup for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + "-" + file.originalname);
+  },
+});
+const upload = multer({ storage });
+
+// ✅ Simple model for storing file info (optional but realistic)
+const FileSchema = new mongoose.Schema({
+  name: String,
+  path: String,
+  size: Number,
+  type: String,
+  uploadedBy: String,
+  projectId: String,
+  uploadedAt: { type: Date, default: Date.now },
+});
+const FileModel = mongoose.model("File", FileSchema);
+
+// ✅ File upload route
+app.post("/api/collaboration/upload", upload.single("file"), async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) return res.status(400).json({ message: "No file uploaded" });
+
+    const newFile = new FileModel({
+      name: file.originalname,
+      path: `/uploads/${file.filename}`,
+      size: file.size,
+      type: file.mimetype.split("/")[0],
+      uploadedBy: req.userId || "Anonymous", // if you want, integrate with your auth middleware
+      projectId: req.body.projectId,
+    });
+
+    await newFile.save();
+
+    res.json({
+      message: "File uploaded successfully",
+      file: {
+        id: newFile._id,
+        name: newFile.name,
+        size: newFile.size,
+        type: newFile.type,
+        uploadedBy: newFile.uploadedBy,
+        uploadedAt: newFile.uploadedAt,
+        url: `${req.protocol}://${req.get("host")}${newFile.path}`,
+      },
+    });
+  } catch (err) {
+    console.error("❌ Error uploading file:", err);
+    res.status(500).json({ message: "File upload failed" });
+  }
+});
+
+// ✅ Get all files for a specific project
+app.get("/api/projects/:projectId/files", async (req, res) => {
+  try {
+    const files = await FileModel.find({ projectId: req.params.projectId });
+    res.json({ files });
+  } catch (err) {
+    console.error("❌ Error fetching files:", err);
+    res.status(500).json({ message: "Failed to fetch files" });
+  }
+});
+
+// ✅ Download route — real download on click
+// app.get("/api/collaboration/download/:id", async (req, res) => {
+//   try {
+//     const file = await FileModel.findById(req.params.id);
+//     if (!file) return res.status(404).json({ message: "File not found" });
+
+//     const filePath = path.join(__dirname, file.path);
+
+//     if (fs.existsSync(filePath)) {
+//       res.download(filePath, file.name); // triggers real browser download
+//     } else {
+//       res.status(404).json({ message: "File missing on server" });
+//     }
+//   } catch (err) {
+//     console.error("❌ Error downloading file:", err);
+//     res.status(500).json({ message: "Download failed" });
+//   }
+// });
+// ✅ Download file by ID
+app.get("/api/collaboration/download/:id", async (req, res) => {
+  try {
+    const file = await FileModel.findById(req.params.id);
+    if (!file) return res.status(404).json({ message: "File not found" });
+
+    const filePath = path.join(__dirname, file.path);
+    res.download(filePath, file.name);
+  } catch (err) {
+    console.error("❌ Error downloading file:", err);
+    res.status(500).json({ message: "Failed to download file" });
+  }
+});
+
+// ✅ Delete file by ID
+app.delete("/api/collaboration/delete/:id", async (req, res) => {
+  try {
+    const file = await FileModel.findById(req.params.id);
+    if (!file) return res.status(404).json({ message: "File not found" });
+
+    const filePath = path.join(__dirname, file.path.replace(/^\//, ''));
+    // Delete file from filesystem
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+
+    // Delete from MongoDB
+    await FileModel.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "File deleted successfully", id: req.params.id });
+  } catch (err) {
+    console.error("❌ Error deleting file:", err);
+    res.status(500).json({ message: "Failed to delete file" });
+  }
+});
 
 // Routes
 const authRoutes = require("./routes/authRoutes");

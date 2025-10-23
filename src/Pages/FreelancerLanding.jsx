@@ -244,7 +244,7 @@ export default function FreelancerLanding() {
       {/* Why Choose Section (existing) */}
       <section className="bg-zinc-950 border-t border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 py-16">
-          <h2 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent">Why Choose Neha's Website?</h2>
+          <h2 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent">Why Choose Gigconnect Website?</h2>
           <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { icon: Shield, title: "Secure Payments", desc: "Protected transactions with escrow system and milestone-based payments." },
@@ -279,7 +279,7 @@ export default function FreelancerLanding() {
       {/* Footer */}
       <footer className="border-t border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 py-8 text-zinc-400 text-sm">
-          © {new Date().getFullYear()} Neha's Website. All rights reserved.
+          © {new Date().getFullYear()} Gigconnect Website. All rights reserved.
         </div>
       </footer>
     </div>

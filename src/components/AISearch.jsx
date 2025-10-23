@@ -60,7 +60,7 @@ const AISearch = ({ onSearch, onFilter }) => {
     saveSearchHistory(term);
     
     try {
-      // AI-powered search with semantic understanding
+      
       const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/search/ai`, {
         method: 'POST',
         headers: {
@@ -79,7 +79,7 @@ const AISearch = ({ onSearch, onFilter }) => {
       onSearch(data.results || []);
     } catch (error) {
       console.error('Error performing AI search:', error);
-      // Fallback to regular search
+      
       onSearch([]);
     }
   };

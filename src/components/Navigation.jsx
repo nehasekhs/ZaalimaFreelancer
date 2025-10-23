@@ -54,7 +54,7 @@ const Navigation = ({ user, onLogout }) => {
   const freelancerOnly = [
   
     { name: 'My Projects', href: '/my-projects', icon: '📋' },
-    { name: 'AI Matches', href: '/ai-matching', icon: '🤖' },
+    // { name: 'AI Matches', href: '/ai-matching', icon: '🤖' },
     { name: 'Gamification', href: '/gamification', icon: '🏆' },
     { name: 'Analytics', href: '/analytics', icon: '📊' },
   ];

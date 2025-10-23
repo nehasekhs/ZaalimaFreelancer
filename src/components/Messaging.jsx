@@ -20,12 +20,12 @@ const Messaging = ({ userId, projectId, onClose }) => {
 
   useEffect(() => {
     fetchConversations();
-    // connect socket
+    
     const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', { withCredentials: true });
     socketRef.current = socket;
     if (userId) socket.emit('register', String(userId));
     socket.on('message:new', (m) => {
-      // If message belongs to current open conversation, append; else refresh conversations
+      
       if (selectedConversation && (m.sender._id === selectedConversation.user._id || m.sender === selectedConversation.user._id)) {
         setMessages((prev) => [...prev, m]);
       }
@@ -67,7 +67,7 @@ const Messaging = ({ userId, projectId, onClose }) => {
       setConversations(data.conversations || []);
     } catch (error) {
       console.error('Error fetching conversations:', error);
-      // Fallback to mock data
+     
       setConversations([
         {
           _id: '1',
@@ -119,7 +119,7 @@ const Messaging = ({ userId, projectId, onClose }) => {
       setMessages(data.messages || []);
     } catch (error) {
       console.error('Error fetching messages:', error);
-      // Fallback to mock data
+      
       setMessages([
         {
           _id: '1',
@@ -205,15 +205,15 @@ const Messaging = ({ userId, projectId, onClose }) => {
         const newMessage = await response.json();
         console.log('New conversation started:', newMessage);
         
-        // Close the modal
+       
         setIsStartingNew(false);
         setNewReceiverEmail('');
         setNewInitialMessage('');
         
-        // Refresh conversations to include the new one
+        
         await fetchConversations();
         
-        // Wait a bit for state to update, then find and select the new conversation
+        
         setTimeout(() => {
           const newConversation = conversations.find(c => 
             c.user?.email === newReceiverEmail || 
@@ -224,7 +224,7 @@ const Messaging = ({ userId, projectId, onClose }) => {
             setSelectedConversation(newConversation);
             fetchMessages(newConversation.user._id);
           } else {
-            // If not found in current conversations, create a temporary conversation object
+            
             const tempConversation = {
               user: {
                 _id: newMessage.receiver,
@@ -261,7 +261,7 @@ const Messaging = ({ userId, projectId, onClose }) => {
   const onFileSelected = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !selectedConversation) return;
-    // Optimistic local append
+    
     const temp = {
       _id: `temp-${Date.now()}`,
       content: `Shared file: ${file.name}`,
@@ -269,7 +269,7 @@ const Messaging = ({ userId, projectId, onClose }) => {
       createdAt: new Date().toISOString(),
     };
     setMessages(prev => [...prev, temp]);
-    // TODO: Implement upload endpoint; for now just reset input
+  
     e.target.value = '';
   };
 
@@ -309,7 +309,7 @@ const Messaging = ({ userId, projectId, onClose }) => {
   return (
     <>
     <div className="flex h-[600px] bg-gray-800 rounded-xl overflow-hidden">
-      {/* Conversations List */}
+      
       <div className="w-1/3 border-r border-gray-700 bg-gray-900">
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center justify-between">
@@ -392,11 +392,11 @@ const Messaging = ({ userId, projectId, onClose }) => {
         </div>
       </div>
 
-      {/* Messages Area */}
+  
       <div className="flex-1 flex flex-col">
         {selectedConversation ? (
           <>
-            {/* Chat Header */}
+         
             <div className="p-4 border-b border-gray-700 bg-gray-900">
               <div className="flex items-center space-x-3">
                 <img
@@ -411,7 +411,7 @@ const Messaging = ({ userId, projectId, onClose }) => {
               </div>
             </div>
 
-            {/* Messages */}
+            
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {isTyping && (
                 <div className="text-gray-500 text-xs">Typing...</div>
@@ -454,7 +454,7 @@ const Messaging = ({ userId, projectId, onClose }) => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Message Input */}
+           
             <form onSubmit={sendMessage} className="p-4 border-t border-gray-700">
               <div className="flex items-center space-x-2">
                 <input ref={fileInputRef} onChange={onFileSelected} type="file" className="hidden" />
@@ -492,7 +492,7 @@ const Messaging = ({ userId, projectId, onClose }) => {
         )}
       </div>
     </div>
-    {/* Start New Conversation Modal */}
+    
     {isStartingNew && (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={()=>setIsStartingNew(false)}>
         <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-xl p-4" onClick={(e)=>e.stopPropagation()}>

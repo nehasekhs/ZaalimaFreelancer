@@ -6,7 +6,9 @@ import { getProfileApi, updateProfileApi } from "../api";
 function Profile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-   const [err, setErr] = useState("");
+  const [err, setErr] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
   const navigate = useNavigate(); // Get the navigate function
 
   // Simulating an API call to a logout endpoint
@@ -42,6 +44,70 @@ function Profile() {
       navigate("/login"); // Redirect to login page after logout
     } catch (err) {
       console.error("Logout failed:", err);
+    }
+  };
+  // Handle Edit Profile
+  const handleEdit = () => {
+    if (user.role === "freelancer") {
+    setFormData({
+      title: user.title || "",
+      location: user.location || "",
+      experienceYears: user.experienceYears || "",
+      hourlyRate: user.hourlyRate || "",
+      skills: (user.skills || []).join(", "),
+      categories: (user.categories || []).join(", "),
+      availability: user.availability || "Available",
+      portfolioUrl: user.portfolioUrl || "",
+      avatarUrl: user.avatarUrl || "",
+      bio: user.bio || "",
+    });
+    } else if (user.role === "client") {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        location: user.location || "",
+        phone: user.phone || "",
+        company: user.company || "",
+        avatarUrl: user.avatarUrl || "",
+        bio: user.bio || "",
+      });
+    }
+    setIsEditing(true);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+   const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      let updates = { ...formData };
+
+      // format fields for freelancer
+      if (user.role === "freelancer") {
+        updates = {
+          ...formData,
+          experienceYears: Number(formData.experienceYears),
+          hourlyRate: Number(formData.hourlyRate),
+          skills: formData.skills
+            ? formData.skills.split(",").map((s) => s.trim()).filter(Boolean)
+            : [],
+          categories: formData.categories
+            ? formData.categories.split(",").map((s) => s.trim()).filter(Boolean)
+            : [],
+        };
+      }
+       const updatedResponse = await updateProfileApi(updates);
+      const updatedUser =
+        updatedResponse.user || updatedResponse.updatedUser || updatedResponse;
+
+      setUser((prev) => ({ ...prev, ...updatedUser })); // merge updates
+      setIsEditing(false);
+      alert("Profile updated successfully!");
+    } catch (error) {
+      alert(error.message || "Failed to update profile");
     }
   };
 
@@ -88,6 +154,20 @@ function Profile() {
                 <p className="md:col-span-2"><span className="text-gray-400">Categories:</span> {user.categories?.join(", ") || "—"}</p>
                 <p className="md:col-span-2"><span className="text-gray-400">Availability:</span> {user.availability || "—"}</p>
                 <p className="md:col-span-2"><span className="text-gray-400">Portfolio:</span> {user.portfolioUrl ? <a className="text-pink-400" href={user.portfolioUrl} target="_blank" rel="noreferrer">{user.portfolioUrl}</a> : "—"}</p>
+                <p className="md:col-span-2"><span className="text-gray-400">Bio:</span> {user.bio || "—"}</p>
+              </div>
+            </div>
+          )}
+          {/* CLIENT INFO */}
+          {user.role === "client" && (
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-3 text-green-400">Client Profile</h3>
+              <div className="grid md:grid-cols-2 gap-4 text-sm">
+                <p><span className="text-gray-400">Name:</span> {user.name || "—"}</p>
+                <p><span className="text-gray-400">Email:</span> {user.email || "—"}</p>
+                <p><span className="text-gray-400">Phone:</span> {user.phone || "—"}</p>
+                <p><span className="text-gray-400">Location:</span> {user.location || "—"}</p>
+                <p><span className="text-gray-400">Company:</span> {user.company || "—"}</p>
                 <p className="md:col-span-2"><span className="text-gray-400">Bio:</span> {user.bio || "—"}</p>
               </div>
             </div>
@@ -153,24 +233,7 @@ function Profile() {
           {/* Edit & Logout */}
           <div className="mt-6 flex gap-3">
             <button
-              onClick={async () => {
-                const updates = {};
-                const title = prompt("Title", user.title || ""); if (title !== null) updates.title = title;
-                const location = prompt("Location", user.location || ""); if (location !== null) updates.location = location;
-                const experienceYears = prompt("Experience (years)", user.experienceYears ?? ""); if (experienceYears !== null && experienceYears !== "") updates.experienceYears = Number(experienceYears);
-                const hourlyRate = prompt("Hourly Rate ($)", user.hourlyRate ?? ""); if (hourlyRate !== null && hourlyRate !== "") updates.hourlyRate = Number(hourlyRate);
-                const skills = prompt("Skills (comma separated)", (user.skills || []).join(", ")); if (skills !== null) updates.skills = skills.split(",").map(s=>s.trim()).filter(Boolean);
-                const categories = prompt("Categories (comma separated)", (user.categories || []).join(", ")); if (categories !== null) updates.categories = categories.split(",").map(s=>s.trim()).filter(Boolean);
-                const availability = prompt("Availability", user.availability || "Available"); if (availability !== null) updates.availability = availability;
-                const portfolioUrl = prompt("Portfolio URL", user.portfolioUrl || ""); if (portfolioUrl !== null) updates.portfolioUrl = portfolioUrl;
-                const avatarUrl = prompt("Profile Photo URL", user.avatarUrl || ""); if (avatarUrl !== null) updates.avatarUrl = avatarUrl;
-                try {
-                  const updated = await updateProfileApi(updates);
-                  setUser(updated);
-                } catch (e) {
-                  alert(e.message);
-                }
-              }}
+              onClick={handleEdit}
               className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition"
             >
               Edit Profile
@@ -182,9 +245,63 @@ function Profile() {
               Logout
             </button>
           </div>
+
+          {/* EDIT FORM MODAL */}
+          {isEditing && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+            >
+              <div className="bg-gray-800 p-6 rounded-xl w-full max-w-md shadow-lg">
+                <h3 className="text-xl font-semibold mb-4 text-center text-white">
+                  Edit {user.role === "client" ? "Client" : "Freelancer"} Profile
+                </h3>
+
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  {/* FREELANCER FIELDS */}
+                  {user.role === "freelancer" && (
+                    <>
+                      <input name="title" value={formData.title} onChange={handleChange} placeholder="Title" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <input name="location" value={formData.location} onChange={handleChange} placeholder="Location" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <input name="experienceYears" type="number" value={formData.experienceYears} onChange={handleChange} placeholder="Experience (years)" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <input name="hourlyRate" type="number" value={formData.hourlyRate} onChange={handleChange} placeholder="Hourly Rate ($)" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <input name="skills" value={formData.skills} onChange={handleChange} placeholder="Skills (comma separated)" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <input name="categories" value={formData.categories} onChange={handleChange} placeholder="Categories (comma separated)" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <input name="avatarUrl" value={formData.avatarUrl} onChange={handleChange} placeholder="Profile Photo URL" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <textarea name="bio" value={formData.bio} onChange={handleChange} placeholder="Bio" className="w-full p-2 rounded bg-gray-700 outline-none"></textarea>
+                    </>
+                  )}
+
+                  {/* CLIENT FIELDS */}
+                  {user.role === "client" && (
+                    <>
+                      <input name="name" value={formData.name} onChange={handleChange} placeholder="Full Name" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <input name="email" value={formData.email} onChange={handleChange} placeholder="Email" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <input name="phone" value={formData.phone} onChange={handleChange} placeholder="Phone Number" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <input name="location" value={formData.location} onChange={handleChange} placeholder="Location" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <input name="company" value={formData.company} onChange={handleChange} placeholder="Company Name" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <input name="avatarUrl" value={formData.avatarUrl} onChange={handleChange} placeholder="Profile Photo URL" className="w-full p-2 rounded bg-gray-700 outline-none" />
+                      <textarea name="bio" value={formData.bio} onChange={handleChange} placeholder="Bio" className="w-full p-2 rounded bg-gray-700 outline-none"></textarea>
+                    </>
+                  )}
+
+                  <div className="flex justify-end gap-2 mt-4">
+                    <button type="button" onClick={() => setIsEditing(false)} className="px-3 py-2 bg-gray-600 rounded hover:bg-gray-700">
+                      Cancel
+                    </button>
+                    <button type="submit" className="px-3 py-2 bg-blue-600 rounded hover:bg-blue-700">
+                      Save
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          )}
         </>
       </motion.div>
     </div>
+
   );
 }
 
