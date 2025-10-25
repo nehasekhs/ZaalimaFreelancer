@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 
-export default function Payments() {
+ function Payments() {
   const [amount, setAmount] = useState(1000);
 
   const createOrder = async () => {
@@ -24,11 +24,11 @@ export default function Payments() {
 
       const order = await createOrder();
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_xxxxxxxx",
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_RBAanpXD67sutR",
         amount: order.amount,
         currency: order.currency,
-        name: "Neha's Website",
-        description: "Wallet Top-up",
+        name: "Freelancer Website",
+        description: "Wallet Top-up ${freelancer.name}",
         order_id: order.id,
         handler: function (response) {
           console.log("Payment successful:", response);
@@ -127,4 +127,4 @@ export default function Payments() {
   );
 }
 
-
+export default Payments;

@@ -29,6 +29,7 @@ import Signup from './Pages/Signup';
 import ExploreCategories from './Pages/ExploreCategories';
 import Reviews from './Pages/Reviews';
 import WriteReview from './Pages/WriteReview';
+import Payments from './Pages/Payments';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -166,7 +167,7 @@ function App() {
                 path="/reviews" 
                 element={<Reviews />} 
               />
-              
+              <Route path='/payment'element={<Payments />} />
               <Route 
                 path="/write-review" 
                 element={<WriteReview />} 

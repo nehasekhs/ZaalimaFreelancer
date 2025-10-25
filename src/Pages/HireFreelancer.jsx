@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import CollaborationTools from "../components/CollaborationTools";
+import { Link } from "react-router-dom";
 
 const mockFreelancer = [
   {
@@ -294,7 +295,14 @@ function FreelancerCard({ freelancer, onHire, onOverview }) {
           </div>
 
           <div className="flex flex-col items-stretch gap-3 mt-4 md:mt-0">
-            <button onClick={() => onHire(freelancer)} className="px-5 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-violet-600 text-white font-semibold">Hire Freelancer</button>
+         <Link
+  to="/payment"
+  state={{ freelancer }}
+>
+  <button className="px-4 py-2 bg-gradient-to-r from-pink-500 to-violet-600 text-white rounded-lg">
+    Hire Freelancer {freelancer.price}
+  </button>
+</Link>
             <button onClick={() => onOverview(freelancer)} className="px-5 py-3 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700">Overview</button>
           </div>
         </div>
